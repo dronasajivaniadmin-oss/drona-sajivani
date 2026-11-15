@@ -308,8 +308,8 @@ export default function Home() {
                     ? "कार्ट में डालें"
                     : "Add to Cart"
                   : hindi
-                    ? "सप्लायर से पूछताछ"
-                    : "Contact Supplier"}
+                    ? "थोक भाव पुछे"
+                    : "Request Quote"}
               </button>
             </div>
           ))}
