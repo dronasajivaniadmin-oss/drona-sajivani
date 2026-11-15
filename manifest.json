@@ -1,0 +1,14 @@
+{
+  "background_color": "#ffffff",
+  "description": "Online Retail, Wholesale and International Market",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "DRONA SAJIVANI",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "DRONA",
+  "start_url": "/",
+  "theme_color": "#d4af37",
+  "id": "/",
+  "lang": "en"
+}
