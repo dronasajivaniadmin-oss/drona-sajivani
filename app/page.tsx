@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 type Product = {
   id: number;
   name: string;
-  price: number;
-  icon: string;
   category: string;
+  price: number;
+  image: string;
+  rating: number;
+  seller: string;
 };
 
 type CartItem = {
@@ -24,54 +26,55 @@ const categories = [
   { name: "Electronics", icon: "📱" },
   { name: "Home & Kitchen", icon: "🏠" },
   { name: "Agriculture", icon: "🚜" },
-  { name: "Grocery", icon: "🛒" },
   { name: "Beauty", icon: "💄" },
-  { name: "Industrial", icon: "🏭" },
+  { name: "Grocery", icon: "🛒" },
   { name: "Automobile", icon: "🚗" },
 ];
 
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Premium T-Shirt",
-    price: 499,
-    icon: "👕",
-    category: "Fashion",
-  },
-  {
-    id: 2,
-    name: "Smart Watch",
-    price: 1999,
-    icon: "⌚",
-    category: "Electronics",
-  },
-  {
-    id: 3,
-    name: "Headphones",
-    price: 1299,
-    icon: "🎧",
-    category: "Electronics",
-  },
-  {
-    id: 4,
-    name: "Kitchen Set",
-    price: 899,
-    icon: "🍳",
-    category: "Home & Kitchen",
-  },
-];
+const data = [
+  ["Premium Cotton T-Shirt", "Fashion", 499, "photo-1521572163474-6864f9cf17ab"],
+  ["Fashion Shoes", "Fashion", 1499, "photo-1542291026-7eec264c27ff"],
+  ["Leather Handbag", "Fashion", 2499, "photo-1584917865442-de89df76afd3"],
+  ["Premium Sunglasses", "Fashion", 899, "photo-1511499767150-a48a237f0083"],
 
-const money = (amount: number) =>
-  "₹" + amount.toLocaleString("en-IN");
+  ["Smart Watch", "Electronics", 1999, "photo-1523275335684-37898b6baf30"],
+  ["Wireless Headphones", "Electronics", 1299, "photo-1505740420928-5e560c06d30e"],
+  ["Smartphone", "Electronics", 12999, "photo-1511707171634-5f897ff02aa9"],
+  ["Laptop", "Electronics", 45999, "photo-1496181133206-80ce9b88a853"],
 
-const buttonStyle = {
-  background: green,
-  color: "white",
-  border: "none",
-  borderRadius: 9,
-  padding: "11px 14px",
-  cursor: "pointer",
-};
+  ["Coffee Maker", "Home & Kitchen", 2999, "photo-1517256673644-36ad11246d21"],
+  ["Modern Chair", "Home & Kitchen", 3499, "photo-1503602642458-232111445657"],
+  ["Table Lamp", "Home & Kitchen", 1199, "photo-1507473885765-e6ed057f782c"],
+
+  ["Garden Tools", "Agriculture", 1499, "photo-1416879595882-3373a0480b5b"],
+  ["Plant Sprayer", "Agriculture", 899, "photo-1466692476868-aef1dfb1e735"],
+  ["Garden Plants", "Agriculture", 399, "photo-1416879595882-3373a0480b5b"],
+
+  ["Beauty Cream", "Beauty", 699, "photo-1556228578-0d85b1a4d571"],
+  ["Perfume", "Beauty", 1499, "photo-1541643600914-78b084683601"],
+
+  ["Fresh Fruits", "Grocery", 499, "photo-1619566636858-adf3ef46400b"],
+  ["Premium Coffee", "Grocery", 799, "photo-1447933601403-0c6688de566e"],
+
+  ["Car Accessories", "Automobile", 1299, "photo-1492144534655-ae79c964c9d7"],
+  ["Car Care Kit", "Automobile", 999, "photo-1485291571150-772bcfc10da5"],
+] as const;
+
+const products: Product[] = data.map((item, index) => ({
+  id: index + 1,
+  name: item[0],
+  category: item[1],
+  price: item[2],
+  image:
+    "https://images.unsplash.com/" +
+    item[3] +
+    "?auto=format&fit=crop&w=500&q=80",
+  rating: 4.2 + (index % 7) * 0.1,
+  seller: "DS Marketplace Demo",
+}));
+
+const money = (value: number) =>
+  "₹" + value.toLocaleString("en-IN");
 
 export default function Home() {
   const [search, setSearch] = useState("");
@@ -79,52 +82,66 @@ export default function Home() {
   const [tab, setTab] = useState("Home");
   const [category, setCategory] = useState("All");
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [wishlist, setWishlist] = useState<number[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem("ds-cart-v1");
-
       if (saved) {
         const parsed: unknown = JSON.parse(saved);
 
         if (Array.isArray(parsed)) {
-          const valid = parsed.filter(
-            (item): item is CartItem =>
-              typeof item === "object" &&
-              item !== null &&
-              typeof item.id === "number" &&
-              products.some((p) => p.id === item.id) &&
-              (item.mode === "Retail" ||
-                item.mode === "Wholesale") &&
-              Number.isSafeInteger(item.quantity) &&
-              item.quantity > 0
+          setCart(
+            parsed.filter(
+              (item): item is CartItem =>
+                typeof item === "object" &&
+                item !== null &&
+                Number.isInteger(item.id) &&
+                products.some((p) => p.id === item.id) &&
+                ["Retail", "Wholesale"].includes(item.mode) &&
+                Number.isSafeInteger(item.quantity) &&
+                item.quantity > 0
+            )
           );
+        }
+      }
 
-          setCart(valid);
+      const savedWishlist = localStorage.getItem("ds-wishlist-v1");
+      if (savedWishlist) {
+        const parsed: unknown = JSON.parse(savedWishlist);
+        if (Array.isArray(parsed)) {
+          setWishlist(
+            parsed.filter(
+              (id): id is number =>
+                typeof id === "number" &&
+                products.some((p) => p.id === id)
+            )
+          );
         }
       }
     } catch {
-      // Start with an empty cart.
+      // Use an empty cart if saved data is invalid.
     }
 
     setLoaded(true);
   }, []);
 
   useEffect(() => {
-    if (loaded) {
-      try {
-        localStorage.setItem(
-          "ds-cart-v1",
-          JSON.stringify(cart)
-        );
-      } catch {
-        // Cart still works during this session.
-      }
-    }
-  }, [cart, loaded]);
+    if (!loaded) return;
 
-  const getPrice = (product: Product, itemMode: string) =>
+    try {
+      localStorage.setItem("ds-cart-v1", JSON.stringify(cart));
+      localStorage.setItem(
+        "ds-wishlist-v1",
+        JSON.stringify(wishlist)
+      );
+    } catch {
+      // Continue without persistent storage.
+    }
+  }, [cart, wishlist, loaded]);
+
+  const priceFor = (product: Product, itemMode: string) =>
     itemMode === "Wholesale"
       ? Math.round(product.price * 0.85)
       : product.price;
@@ -156,52 +173,40 @@ export default function Home() {
       old
         .map((item) =>
           item.id === id && item.mode === itemMode
-            ? {
-                ...item,
-                quantity: item.quantity + change,
-              }
+            ? { ...item, quantity: item.quantity + change }
             : item
         )
         .filter((item) => item.quantity > 0)
     );
   };
 
-  const removeItem = (id: number, itemMode: string) => {
-    setCart((old) =>
-      old.filter(
-        (item) =>
-          !(item.id === id && item.mode === itemMode)
-      )
-    );
-  };
-
   const cartCount = cart.reduce(
-    (sum, item) => sum + item.quantity,
+    (total, item) => total + item.quantity,
     0
   );
 
-  const cartTotal = cart.reduce((sum, item) => {
-    const product = products.find(
-      (p) => p.id === item.id
-    );
-
+  const cartTotal = cart.reduce((total, item) => {
+    const product = products.find((p) => p.id === item.id);
     return product
-      ? sum +
-          getPrice(product, item.mode) * item.quantity
-      : sum;
+      ? total + priceFor(product, item.mode) * item.quantity
+      : total;
   }, 0);
 
-  const filtered = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
+  const filtered = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(search.toLowerCase()) &&
+      (category === "All" || product.category === category) &&
+      (tab !== "Wishlist" || wishlist.includes(product.id))
+  );
 
-    const matchesCategory =
-      category === "All" ||
-      product.category === category;
-
-    return matchesSearch && matchesCategory;
-  });
+  const buttonStyle = {
+    background: green,
+    color: "white",
+    border: "none",
+    borderRadius: 9,
+    padding: "11px 13px",
+    cursor: "pointer",
+  };
 
   return (
     <main
@@ -210,14 +215,14 @@ export default function Home() {
         background: "#f5f8f5",
         color: "#173b27",
         fontFamily: "Arial, sans-serif",
-        paddingBottom: 95,
+        paddingBottom: 100,
       }}
     >
       <header
         style={{
           background: green,
           color: "white",
-          padding: 18,
+          padding: 20,
           textAlign: "center",
         }}
       >
@@ -226,30 +231,30 @@ export default function Home() {
             display: "inline-block",
             border: `2px solid ${gold}`,
             borderRadius: "50%",
-            padding: 12,
-            fontSize: 25,
-            fontWeight: "bold",
+            padding: 13,
             color: gold,
+            fontSize: 27,
+            fontWeight: "bold",
           }}
         >
           DS
         </div>
 
-        <h1 style={{ fontSize: 24, marginBottom: 5 }}>
+        <h1 style={{ fontSize: 25, marginBottom: 5 }}>
           DRONA SAJIVANI
         </h1>
 
         <p style={{ margin: 0 }}>
-          Your Global Shopping Marketplace
+          Premium Global Shopping Marketplace
         </p>
 
         <button
-          onClick={() => setTab("Cart")}
           style={{
             ...buttonStyle,
-            marginTop: 12,
             border: "1px solid white",
+            marginTop: 14,
           }}
+          onClick={() => setTab("Cart")}
         >
           🛒 Cart ({cartCount})
         </button>
@@ -269,7 +274,6 @@ export default function Home() {
               }}
             >
               <p>Your cart is empty.</p>
-
               <button
                 style={buttonStyle}
                 onClick={() => setTab("Home")}
@@ -286,48 +290,57 @@ export default function Home() {
 
                 if (!product) return null;
 
-                const price = getPrice(
-                  product,
-                  item.mode
-                );
+                const unitPrice = priceFor(product, item.mode);
 
                 return (
                   <div
                     key={`${item.id}-${item.mode}`}
                     style={{
                       background: "white",
-                      padding: 16,
                       borderRadius: 12,
+                      padding: 15,
                       marginBottom: 12,
                     }}
                   >
-                    <div style={{ fontSize: 40 }}>
-                      {product.icon}
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 14,
+                        alignItems: "center",
+                      }}
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        style={{
+                          width: 90,
+                          height: 90,
+                          objectFit: "cover",
+                          borderRadius: 10,
+                        }}
+                      />
+
+                      <div>
+                        <h3 style={{ margin: "0 0 5px" }}>
+                          {product.name}
+                        </h3>
+                        <p>{item.mode}</p>
+                        <strong>{money(unitPrice)}</strong>
+                      </div>
                     </div>
-
-                    <h3>{product.name}</h3>
-
-                    <p>{item.mode}</p>
-
-                    <p>
-                      Unit Price: {money(price)}
-                    </p>
 
                     <div
                       style={{
                         display: "flex",
-                        alignItems: "center",
                         gap: 12,
+                        alignItems: "center",
+                        marginTop: 15,
                       }}
                     >
                       <button
                         style={buttonStyle}
                         onClick={() =>
-                          changeQuantity(
-                            item.id,
-                            item.mode,
-                            -1
-                          )
+                          changeQuantity(item.id, item.mode, -1)
                         }
                       >
                         −
@@ -338,11 +351,7 @@ export default function Home() {
                       <button
                         style={buttonStyle}
                         onClick={() =>
-                          changeQuantity(
-                            item.id,
-                            item.mode,
-                            1
-                          )
+                          changeQuantity(item.id, item.mode, 1)
                         }
                       >
                         +
@@ -352,20 +361,28 @@ export default function Home() {
                     <p>
                       Subtotal:{" "}
                       <strong>
-                        {money(price * item.quantity)}
+                        {money(unitPrice * item.quantity)}
                       </strong>
                     </p>
 
                     <button
                       onClick={() =>
-                        removeItem(item.id, item.mode)
+                        setCart((old) =>
+                          old.filter(
+                            (entry) =>
+                              !(
+                                entry.id === item.id &&
+                                entry.mode === item.mode
+                              )
+                          )
+                        )
                       }
                       style={{
                         background: "#b42318",
                         color: "white",
                         border: "none",
-                        borderRadius: 8,
                         padding: 10,
+                        borderRadius: 8,
                       }}
                     >
                       Remove Product
@@ -385,15 +402,11 @@ export default function Home() {
                 <h2>Total: {money(cartTotal)}</h2>
 
                 <p>
-                  Demo prices only. Shipping and taxes
-                  are not included.
+                  Demo prices. Shipping and taxes not included.
                 </p>
 
                 <button
-                  style={{
-                    ...buttonStyle,
-                    width: "100%",
-                  }}
+                  style={{ ...buttonStyle, width: "100%" }}
                   onClick={() =>
                     alert(
                       "Checkout coming soon. No order has been placed."
@@ -410,7 +423,7 @@ export default function Home() {
         <section style={{ padding: 16 }}>
           <input
             type="search"
-            placeholder="Search products..."
+            placeholder="🔍 Search products..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
@@ -418,7 +431,7 @@ export default function Home() {
               boxSizing: "border-box",
               padding: 14,
               border: "1px solid #ddd",
-              borderRadius: 10,
+              borderRadius: 12,
               fontSize: 16,
             }}
           />
@@ -427,17 +440,15 @@ export default function Home() {
             style={{
               background: green,
               color: "white",
-              borderRadius: 15,
-              padding: 22,
+              padding: 24,
               marginTop: 18,
+              borderRadius: 16,
               textAlign: "center",
             }}
           >
             <h2>Welcome to DRONA SAJIVANI</h2>
             <p>Shop Local. Trade Global.</p>
-            <p>
-              Retail • Wholesale • Import • Export
-            </p>
+            <p>Retail • Wholesale • Import • Export</p>
           </div>
 
           <div
@@ -456,10 +467,8 @@ export default function Home() {
                   padding: 13,
                   borderRadius: 10,
                   border: `1px solid ${green}`,
-                  background:
-                    mode === item ? green : "white",
-                  color:
-                    mode === item ? "white" : green,
+                  background: mode === item ? green : "white",
+                  color: mode === item ? "white" : green,
                   fontWeight: "bold",
                 }}
               >
@@ -473,7 +482,7 @@ export default function Home() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
+              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
               gap: 8,
             }}
           >
@@ -486,9 +495,7 @@ export default function Home() {
                 }}
                 style={{
                   background:
-                    category === item.name
-                      ? "#e1f3e8"
-                      : "white",
+                    category === item.name ? "#e1f3e8" : "white",
                   border:
                     category === item.name
                       ? `2px solid ${green}`
@@ -500,23 +507,22 @@ export default function Home() {
                   overflowWrap: "anywhere",
                 }}
               >
-                <div style={{ fontSize: 28 }}>
-                  {item.icon}
-                </div>
+                <div style={{ fontSize: 28 }}>{item.icon}</div>
                 {item.name}
               </button>
             ))}
           </div>
 
-          <h2>Featured Products</h2>
+          <h2>
+            {tab === "Wishlist"
+              ? "❤️ My Wishlist"
+              : "✨ Featured Products"}
+          </h2>
 
           {category !== "All" && (
             <button
+              style={{ ...buttonStyle, marginBottom: 12 }}
               onClick={() => setCategory("All")}
-              style={{
-                ...buttonStyle,
-                marginBottom: 12,
-              }}
             >
               Show All Products
             </button>
@@ -535,34 +541,99 @@ export default function Home() {
                 key={product.id}
                 style={{
                   background: "white",
-                  borderRadius: 12,
-                  padding: 14,
-                  textAlign: "center",
+                  borderRadius: 14,
+                  overflow: "hidden",
+                  boxShadow: "0 3px 12px rgba(0,0,0,0.06)",
                 }}
               >
-                <div style={{ fontSize: 48 }}>
-                  {product.icon}
+                <div style={{ position: "relative" }}>
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    loading="lazy"
+                    style={{
+                      width: "100%",
+                      height: 155,
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+
+                  <button
+                    onClick={() =>
+                      setWishlist((old) =>
+                        old.includes(product.id)
+                          ? old.filter((id) => id !== product.id)
+                          : [...old, product.id]
+                      )
+                    }
+                    aria-label="Toggle wishlist"
+                    style={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      background: "white",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: 35,
+                      height: 35,
+                      fontSize: 20,
+                    }}
+                  >
+                    {wishlist.includes(product.id) ? "❤️" : "🤍"}
+                  </button>
                 </div>
 
-                <h3 style={{ fontSize: 15 }}>
-                  {product.name}
-                </h3>
+                <div style={{ padding: 12 }}>
+                  <h3
+                    style={{
+                      fontSize: 14,
+                      minHeight: 36,
+                      margin: "0 0 8px",
+                    }}
+                  >
+                    {product.name}
+                  </h3>
 
-                <p style={{ fontWeight: "bold" }}>
-                  {money(getPrice(product, mode))}
-                </p>
+                  <div
+                    style={{
+                      color: "#b8860b",
+                      fontSize: 13,
+                    }}
+                  >
+                    ★ {product.rating.toFixed(1)} (Demo)
+                  </div>
 
-                <button
-                  onClick={() =>
-                    addToCart(product.id)
-                  }
-                  style={{
-                    ...buttonStyle,
-                    width: "100%",
-                  }}
-                >
-                  Add to Cart
-                </button>
+                  <p
+                    style={{
+                      fontSize: 12,
+                      color: "#666",
+                    }}
+                  >
+                    {product.seller}
+                  </p>
+
+                  <strong style={{ fontSize: 17 }}>
+                    {money(priceFor(product, mode))}
+                  </strong>
+
+                  {mode === "Wholesale" && (
+                    <p style={{ color: green, fontSize: 12 }}>
+                      Demo Wholesale Price
+                    </p>
+                  )}
+
+                  <button
+                    style={{
+                      ...buttonStyle,
+                      width: "100%",
+                      marginTop: 12,
+                    }}
+                    onClick={() => addToCart(product.id)}
+                  >
+                    🛒 Add to Cart
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -575,42 +646,33 @@ export default function Home() {
             style={{
               background: "#fff8e5",
               border: `1px solid ${gold}`,
-              borderRadius: 14,
               padding: 20,
+              borderRadius: 14,
               marginTop: 25,
               textAlign: "center",
             }}
           >
             <h2>🌍 International Marketplace</h2>
-            <p>
-              Connect Buyers and Sellers Worldwide
-            </p>
-            <p>
-              Import • Export • Global Wholesale
-            </p>
+            <p>Connect Buyers and Sellers Worldwide</p>
+            <p>Import • Export • Global Wholesale</p>
           </div>
 
           <div
             style={{
               background: "white",
-              borderRadius: 14,
               padding: 20,
+              borderRadius: 14,
               marginTop: 20,
               textAlign: "center",
             }}
           >
             <h2>🏪 Become a Seller</h2>
-
-            <p>
-              Grow your business with DRONA SAJIVANI
-            </p>
+            <p>Grow your business with DRONA SAJIVANI</p>
 
             <button
               style={buttonStyle}
               onClick={() =>
-                alert(
-                  "Seller registration coming soon"
-                )
+                alert("Seller registration coming soon")
               }
             >
               Register as Seller
@@ -636,6 +698,7 @@ export default function Home() {
         {[
           { name: "Home", icon: "🏠" },
           { name: "Categories", icon: "📂" },
+          { name: "Wishlist", icon: "❤️" },
           { name: "Cart", icon: "🛒" },
           { name: "Account", icon: "👤" },
         ].map((item) => (
@@ -643,52 +706,43 @@ export default function Home() {
             key={item.name}
             onClick={() => {
               if (item.name === "Account") {
-                alert(
-                  "Customer account coming soon"
-                );
-              } else if (
-                item.name === "Categories"
-              ) {
+                alert("Customer account coming soon");
+                return;
+              }
+
+              if (item.name === "Categories") {
                 setTab("Home");
                 setTimeout(() => {
                   document
                     .getElementById("categories")
-                    ?.scrollIntoView({
-                      behavior: "smooth",
-                    });
+                    ?.scrollIntoView({ behavior: "smooth" });
                 }, 50);
-              } else {
-                setTab(item.name);
-
-                if (item.name === "Home") {
-                  setCategory("All");
-                }
-
-                window.scrollTo({
-                  top: 0,
-                  behavior: "smooth",
-                });
+                return;
               }
+
+              setTab(item.name);
+
+              if (item.name === "Home") {
+                setCategory("All");
+              }
+
+              if (item.name === "Wishlist") {
+                setCategory("All");
+              }
+
+              window.scrollTo({ top: 0, behavior: "smooth" });
             }}
             style={{
               border: "none",
               background: "white",
-              color:
-                tab === item.name
-                  ? green
-                  : "#666",
-              fontSize: 12,
+              color: tab === item.name ? green : "#666",
+              fontSize: 11,
               cursor: "pointer",
             }}
           >
-            <div style={{ fontSize: 22 }}>
-              {item.icon}
-            </div>
-
+            <div style={{ fontSize: 21 }}>{item.icon}</div>
             {item.name}
-
-            {item.name === "Cart" &&
-              ` (${cartCount})`}
+            {item.name === "Cart" ? ` (${cartCount})` : ""}
           </button>
         ))}
       </nav>
