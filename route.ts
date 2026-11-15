@@ -1,5 +1,30 @@
-import { NextRequest,NextResponse } from 'next/server';
-import { currentUser } from '@/lib/auth';
-import { db } from '@/lib/db';
-export async function GET(req:NextRequest){const u=await currentUser(req);if(u?.role!=='admin')return NextResponse.json({error:'Forbidden'},{status:403});const r=await db.query('SELECT s.id,s.business_name,s.status,u.email FROM sellers s JOIN users u ON u.id=s.user_id ORDER BY s.created_at DESC');return NextResponse.json(r.rows);}
-export async function PATCH(req:NextRequest){const u=await currentUser(req);if(u?.role!=='admin')return NextResponse.json({error:'Forbidden'},{status:403});const {sellerId,status}=await req.json();if(typeof sellerId!=='string'||!['approved','rejected'].includes(status))return NextResponse.json({error:'Invalid request'},{status:400});const client=await db.connect();try{await client.query('BEGIN');const r=await client.query('UPDATE sellers SET status=$1 WHERE id=$2 RETURNING user_id',[status,sellerId]);if(!r.rowCount){await client.query('ROLLBACK');return NextResponse.json({error:'Seller not found'},{status:404});}await client.query("UPDATE users SET role=CASE WHEN $1='approved' THEN 'seller' ELSE 'customer' END WHERE id=$2 AND role <> 'admin'",[status,r.rows[0].user_id]);await client.query('COMMIT');return NextResponse.json({status});}catch{await client.query('ROLLBACK');return NextResponse.json({error:'Update failed'},{status:500});}finally{client.release();}}
+import { NextResponse } from "next/server";
+
+export async function GET() {
+  return NextResponse.json({
+    success: true,
+    message: "DRONA SAJIVANI API is working",
+    company: "DRONA SAJIVANI",
+    status: "active"
+  });
+}
+
+export async function POST(request: Request) {
+  try {
+    const data = await request.json();
+
+    return NextResponse.json({
+      success: true,
+      message: "Request received successfully",
+      data
+    });
+  } catch {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Invalid request data"
+      },
+      { status: 400 }
+    );
+  }
+}
