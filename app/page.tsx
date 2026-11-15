@@ -289,7 +289,29 @@ export default function Home() {
                   if (mode === "retail") {
                     setCart((previous) => [...previous, product.id]);
                   } else {
-                    alert("Supplier enquiry feature coming soon.");
+                    alert(" const productName = product.name;
+
+const buyerName = prompt("Enter Buyer / Business Name:");
+if (!buyerName?.trim()) return;
+
+const mobile = prompt("Enter Mobile Number:");
+if (!mobile?.trim()) return;
+
+const quantity = prompt("Enter Bulk Quantity:");
+if (!quantity || Number(quantity) <= 0) return;
+
+const country = prompt("Enter Delivery Country:");
+if (!country?.trim()) return;
+
+alert(
+  "DRONA SAJIVANI - Wholesale Enquiry\n\n" +
+  "Product: " + productName + "\n" +
+  "Buyer: " + buyerName + "\n" +
+  "Mobile: " + mobile + "\n" +
+  "Quantity: " + quantity + "\n" +
+  "Country: " + country + "\n\n" +
+  "Demo enquiry prepared. Not sent to supplier."
+);
                   }
                 }}
                 style={{
