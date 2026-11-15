@@ -219,7 +219,7 @@ export default function Home() {
       }}
     >
       <header
-        style={{
+        style={{8
           background: green,
           color: "white",
           padding: 20,
@@ -735,17 +735,4 @@ export default function Home() {
             style={{
               border: "none",
               background: "white",
-              color: tab === item.name ? green : "#666",
-              fontSize: 11,
-              cursor: "pointer",
-            }}
-          >
-            <div style={{ fontSize: 21 }}>{item.icon}</div>
-            {item.name}
-            {item.name === "Cart" ? ` (${cartCount})` : ""}
-          </button>
-        ))}
-      </nav>
-    </main>
-  );
-}
+              color: tab === item.name ? green : 
