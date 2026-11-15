@@ -1,2 +1,60 @@
-const categories=['🧴 Bathroom Cleaning Materials','🚘 Car Wash Shampoo','🧽 Home Cleaning Products','🌾 Agriculture Products','🏭 Industrial Products'];
-export default function Home(){return <><header><b>DS <span>DRONA SAJIVANI</span></b><nav><span>Retail</span><span>Wholesale</span><span>Become a Seller</span><span>हिन्दी / English</span></nav></header><main><div className="hero"><h1>Everything for Business & Home</h1><p>DRONA SAJIVANI — a modern Indian retail and wholesale marketplace. Discover quality cleaning supplies, car care and more.</p><div className="buttons"><a className="button" href="#categories">Explore Categories</a><a className="button alt" href="#seller">Become a Seller</a></div></div><section id="categories"><h2>Shop by Category · कैटेगरी चुनें</h2><div className="grid">{categories.map(c=><div className="card" key={c}><h3>{c}</h3><p>Browse products and wholesale enquiries</p></div>)}</div></section><section><h2>Why DRONA SAJIVANI?</h2><div className="grid"><div className="card"><h3>Retail + Wholesale</h3><p>Built for individual and bulk buyers.</p></div><div className="card"><h3>Verified Sellers</h3><p>Seller applications reviewed by the marketplace admin.</p></div><div className="card"><h3>India First</h3><p>Designed to expand internationally later.</p></div></div></section><section id="seller" className="card"><h2>Sell with DRONA SAJIVANI</h2><p>Seller registration and approval APIs are included in the starter backend. The seller-facing forms and complete dashboard will be connected in the next build.</p></section></main><footer>© DRONA SAJIVANI · Development Starter — not a live store</footer></>}
+"use client";
+
+import { useState } from "react";
+
+const categories = [
+  { name: "Fashion", icon: "👕" },
+  { name: "Electronics", icon: "📱" },
+  { name: "Home & Kitchen", icon: "🏠" },
+  { name: "Agriculture", icon: "🚜" },
+  { name: "Beauty", icon: "💄" },
+  { name: "Grocery", icon: "🛒" },
+  { name: "Industrial", icon: "🏭" },
+  { name: "Automobile", icon: "🚗" },
+];
+
+const products = [
+  { id: 1, name: "Premium Cotton T-Shirt", price: 499, icon: "👕" },
+  { id: 2, name: "Wireless Headphones", price: 1299, icon: "🎧" },
+  { id: 3, name: "Kitchen Essentials", price: 899, icon: "🍳" },
+  { id: 4, name: "Agriculture Tools", price: 1499, icon: "🚜" },
+  { id: 5, name: "Beauty Products", price: 699, icon: "💄" },
+  { id: 6, name: "Smart Watch", price: 1999, icon: "⌚" },
+];
+
+export default function Home() {
+  const [search, setSearch] = useState("");
+  const [cart, setCart] = useState<number[]>([]);
+  const [mode, setMode] = useState("Retail");
+
+  const filtered = products.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <main style={{ background: "#f4f7f4", minHeight: "100vh", color: "#173b27" }}>
+      <header style={{ background: "#087b42", padding: 18, color: "white" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: 25, fontWeight: "bold" }}>DS</div>
+            <div style={{ fontSize: 16, fontWeight: "bold" }}>DRONA SAJIVANI</div>
+          </div>
+          <div style={{ fontSize: 20 }}>🛒 {cart.length}</div>
+        </div>
+
+        <input
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            width: "100%",
+            boxSizing: "border-box",
+            padding: 14,
+            marginTop: 18,
+            borderRadius: 9,
+            border: "none",
+            fontSize: 16,
+          }}
+        />
+
+        <div style={{ display: "flex", gap: 10,
