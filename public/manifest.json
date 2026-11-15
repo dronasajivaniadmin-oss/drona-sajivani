@@ -1,14 +1,19 @@
 {
-  "background_color": "#ffffff",
-  "description": "Online Retail, Wholesale and International Market",
-  "dir": "ltr",
-  "display": "standalone",
   "name": "DRONA SAJIVANI",
-  "orientation": "any",
-  "scope": "/",
   "short_name": "DRONA",
+  "description": "Online Retail, Wholesale and International Market",
   "start_url": "/",
-  "theme_color": "#d4af37",
   "id": "/",
-  "lang": "en"
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#d4af37",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
 }
