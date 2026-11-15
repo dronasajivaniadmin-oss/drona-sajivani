@@ -289,8 +289,8 @@ export default function Home() {
                   if (mode === "retail") {
                     setCart((previous) => [...previous, product.id]);
                   } else {
-                    alert(" const productName = product.name;
-
+                          const productName = product.name;
+ 
 const buyerName = prompt("Enter Buyer / Business Name:");
 if (!buyerName?.trim()) return;
 
